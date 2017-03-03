@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.wvmon.firstproject.helloworld;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,14 +11,22 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.text.DateFormat;
+import java.io.*;
 
 /**
  *
  * @author William Montesdeoca
  */
-@WebServlet(name = "HelloServlet", urlPatterns = {"/HelloServlet"})
-public class HelloServlet extends HttpServlet {
-
+@WebServlet(urlPatterns = {"/submitPost"})
+public class submitPost extends HttpServlet {
+    
+    Writer writer = null;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -37,13 +44,10 @@ public class HelloServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet HelloServlet</title>");
-            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">");
+            out.println("<title>Servlet submitPost</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Hello Servlet World</h1>"); 
-            out.println("<h1>Hello Everyone!!!</h1>");
-            out.println("<p>" + request.getContextPath() + "</p>");
+            out.println("<h1>Servlet submitPost at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -75,7 +79,39 @@ public class HelloServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        
+        String username = request.getParameter("username");
+        String content = request.getParameter("post");
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        Date today = Calendar.getInstance().getTime();
+        String theDate = df.format(today);
+        
+        try(FileWriter fw = new FileWriter((this.getServletContext().getRealPath("/") + "discussion.txt"), true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter out = new PrintWriter(bw))
+            {
+                
+                out.println(username);
+                out.println("<br/>");
+                out.println(theDate);
+                out.println("<br/>");
+                out.println(content);
+                out.println("<br/><hr/>");
+                
+                //HttpSession session = request.getSession(true);
+                //String user = (String) session.getAttribute("user");
+            } catch (IOException e){
+                //handle the exception!
+            }
+        
+            try {
+                Thread.sleep(2000);
+                request.getRequestDispatcher("/thread.jsp").forward(request, response);
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        
+
     }
 
     /**
